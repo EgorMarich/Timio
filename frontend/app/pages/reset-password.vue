@@ -1,0 +1,8 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { useTimioAuthApi } from "../composables/useTimioAuthApi";
+const api=useTimioAuthApi(); const route=useRoute(); const password=ref(""); const confirm=ref(""); const loading=ref(false); const error=ref(""); const done=ref(false);
+async function submit(){error.value=""; if(password.value.length<10 || !/[A-Za-z]/.test(password.value) || !/\d/.test(password.value)||password.value!==confirm.value){error.value="Пароли должны совпадать и содержать минимум 10 символов, с буквами и цифрами.";return;} loading.value=true; try{await api.resetPassword(route.query.token as string,password.value);done.value=true;}catch(e:any){error.value=e.message==='invalid_or_expired_token'?'Ссылка недействительна или истекла.':'Не удалось изменить пароль.'}finally{loading.value=false;}}
+</script>
+<template><div class="centered-shell"><div class="auth-card"><div class="brand"><span class="brand-mark">T</span><span class="brand-name">Timio</span></div><h1 class="page-title">Новый пароль</h1><div v-if="done" class="success-banner">Пароль изменён. Все старые сессии завершены.</div><form v-else @submit.prevent="submit"><div v-if="error" class="error-banner">{{error}}</div><div class="field"><label class="field-label">Новый пароль</label><input v-model="password" type="password" autocomplete="new-password" minlength="10" required /></div><div class="field"><label class="field-label">Повторите пароль</label><input v-model="confirm" type="password" autocomplete="new-password" minlength="10" required /></div><button class="btn-primary" :disabled="loading">{{loading?'…':'Сохранить пароль'}}</button></form><p class="footer-link"><NuxtLink to="/login" class="btn-link">Перейти ко входу</NuxtLink></p></div></div>
+</template>
